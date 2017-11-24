@@ -3,82 +3,84 @@
  * declaring required modules
  */
 const queryUtil = require('../../../DB/queryUtil.js')
-/**
- * defining resolver functions 
+ /**
+ * defining resolver functions
  */
 const resolvers = {
     Query: {
-    /**
-     * retrieve user data from db
-     * @param {*} root 
-     * @param {*} args 
-     * @param {*} ctx 
-     * @param {*} info 
-     */
+  /**
+ * fetches user details 
+ * @param {*} _ contains root object i.e. parent result
+ * @param {*} args arguments provided in the query
+ * @param {*} context contains db settings defined in server config. In this caes elastic search client
+ */
     getUserDetails(_, args,context){
-       return {
-        "id":"1",
-        "fname":"Alex",
-        "lname":"Galllio",
-        "email":"dfdgf@hhj.com",
-        "isActive":true,
-        "birthDate":"12/12/1990",
-        "pinCode":12133
-    }
-        //  if(args.userId){
-        //     body={
-        //         "query": {
-        //           "match":{
-        //               "query":args.userId,
-        //               "field": id
-        //           }
-        //         }
-        //       }
-        //     return queryUtil.getUserDetails(context,'user',body)
-        //  }
+          if(args.userId){
+            console.log(args.userId)
+            body={
+                "query": {
+                  "match":{
+                      "id":args.userId
+                  }
+                }
+              }
+            return queryUtil.getUserDetails(context,'user',body)
+         }
             
       },
-    /**
-     * find all active users
-     * @param {*} root 
-     * @param {*} args 
-     * @param {*} ctx 
-     * @param {*} info 
-     */
+  /**
+ * fetches active user details 
+ * @param {*} _ contains root object i.e. parent result
+ * @param {*} args arguments provided in the query
+ * @param {*} context contains db settings defined in server config. In this caes elastic search client
+ */
     getActiveUsers(_,args,context){
-      return [{
-        "id":"1",
-        "fname":"Alex",
-        "lname":"Galllio",
-        "email":"dfdgf@hhj.com",
-        "isActive":true,
-        "birthDate":"12/12/1990",
-        "pinCode":12133
-    }]
-      // console.log("here")
-      //   body={
-      //       "query": {
-      //         "match":{
-      //             "query":true,
-      //             "field": "isActive"
-      //         }
-      //       }
-      //     }
-      //     return queryUtil.getUserDetails(context,'user',body)
+      // return userData
+      var body = {
+        "query": {
+          "match":{
+            "isActive":true
+          }
+        }
+      };
+          return queryUtil.getActiveUsers(context,'user',body)
     }
-  
+      ,
+  /**
+ * fetches all todos of a particular user 
+ * @param {*} _ contains root object i.e. parent result
+ * @param {*} args arguments provided in the query
+ * @param {*} context contains db settings defined in server config. In this caes elastic search client
+ */
+    getToDos(_,args,context){
+      var body = {
+        "query": {
+          "match":{
+            "userId":args.userId
+          }
+        }
+      };
+        if(args.userId)
+          return  queryUtil.getToDos(context,'todo',body)
+    },
+  /**
+ * fetches todo details
+ * @param {*} _ contains root object i.e. parent result
+ * @param {*} args arguments provided in the query
+ * @param {*} context contains db settings defined in server config. In this caes elastic search client
+ */
+    getToDo(_,args,context){
+      var body = {
+        "query": {
+          "match":{
+            "id":args.id
+          }
+        }
+      };
+        if(args.id)
+          return  queryUtil.getToDo(context,'todo',body)
+    }
     //,
-    // /**
-    //  * retrieves all todos of a particular user
-    //  * @param {*} root 
-    //  * @param {*} args 
-    //  * @param {*} ctx 
-    //  * @param {*} info 
-    //  */
-    // getToDos(root,args,ctx,info){
-    //     if(args.userId)
-    //         return query.getToDos(root,args,ctx,info)
-    // },
     // /**
     //  * retrieves all active todos of a particular user
     //  * @param {*} root 
@@ -91,17 +93,27 @@ const resolvers = {
     //         return query.getToDos(root,args,ctx,info)
     // }
      },
+     /**
+      * defining type user
+      */
      User:{
-      todos(userId){
-        return {    
-          id:"5",
-          text:"now",
-          userId:"1",
-          done:"false",
-          targetDate:"24/11/2017"
-        }
-      }
+/**
+ * fetches user details 
+ * @param {*} _ contains root object i.e. parent result
+ * @param {*} args arguments provided in the query
+ * @param {*} context contains db settings defined in server config. In this caes elastic search client
+ */
+      todos(_,args,context){
+        var body = {
+          "query": {
+            "match":{
+              "userId":_.id
+            }
+          }
+        };
+        return queryUtil.getToDos(context,'todo',body) 
      }
      }
+    }
   
 module.exports= resolvers;

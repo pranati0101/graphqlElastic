@@ -1,50 +1,53 @@
-
 /**
  * defining queries
  *
  * 
  * */
-const indexName="assignment01";
-// const client=require('../../config/database')
-// client.connectToES().then(function(esClient){
-   /**
-    * 
-    * @param {*} text 
-    * @param {*} indexName 
-    * @param {*} typeName 
-    * @param {*} callback 
-    */
-   exports.getUserDetail=function (context,typename, body) {
-       console.log("here")
-       return {"fname":"Alex"}
-    //   return new Promise(function(resolve,reject){
-    //    context.esClient.search({
-    //        index: indexName,
-    //        type: typeName,
-    //        body: body
-    //    }).then(function (res) {
-    //        var results = res.hits.hits.map(function(hit){
-    //          console.log("hit source : "+JSON.stringify(hit._source));
-    //            resolve(hit._source)
-    //        });
-    //    }).catch(function (err) {
-    //        console.log("Error",err);
-    //        reject(err);
-    //      });
-    //   })
+const _=require('lodash')
+
+/**
+ * fetches user details 
+ * @param {*} context contains db settings defined in server config. In this caes elastic search client
+ * @param {*} typeName type and index name
+ * @param {*} body query 
+ */
+   exports.getUserDetails=function (context,typeName, body) {
+      return new Promise(function(resolve,reject){
+       context.search({
+           index: typeName,
+           type: typeName,
+           body: body
+       }).then(function (res) {
+        if(res.hits.total>0){
+            var results=res.hits.hits;
+            resolve(results[0]._source)
+        }
+    
+       }).catch(function (err) {
+           reject(err);
+         });
+      })
            
    }
-   exports.getActiveUsers=function (context,typename, body) {
+   /**
+   * fetches list of active users
+   * @param {*} context contains db settings defined in server config. In this caes elastic search client
+   * @param {*} typeName type and index name
+   * @param {*} body query 
+   */
+   exports.getActiveUsers=function (context,typeName, body) {
        return new Promise(function(resolve,reject){
-        context.esClient.search({
-            index: indexName,
+        context.search({
+            index: typeName,
             type: typeName,
             body: body
-        }).then(function (res) {
-            var results = res.hits.hits.map(function(hit){
-              console.log("hit source : "+JSON.stringify(hit._source));
-                resolve(hit._source)
-            });
+            }
+        ).then(function (res) {
+            var results=res.hits.hits;
+            finalResult=_.map(results,function(obj){
+                return obj._source
+            })
+            resolve(finalResult)
         }).catch(function (err) {
             console.log("Error",err);
             reject(err);
@@ -52,4 +55,53 @@ const indexName="assignment01";
        })
             
     }
-// })
+     /**
+   * fetches todos of a particular user
+   * @param {*} context contains db settings defined in server config. In this caes elastic search client
+   * @param {*} typeName type and index name
+   * @param {*} body query 
+   */
+    exports.getToDos=function (context,typeName, body) {
+        return new Promise(function(resolve,reject){
+         context.search({
+             index: typeName,
+             type: typeName,
+             body: body
+             }
+         ).then(function (res) {
+             var results=res.hits.hits;
+             finalResult=_.map(results,function(obj){
+                 return obj._source
+             })
+             resolve(finalResult)
+         }).catch(function (err) {
+             console.log("Error",err);
+             reject(err);
+           });
+        })    
+     }
+
+     /**
+   * fetches todo of a particular id
+   * @param {*} context contains db settings defined in server config. In this caes elastic search client
+   * @param {*} typeName type and index name
+   * @param {*} body query 
+   */
+  exports.getToDo=function (context,typeName, body) {
+    return new Promise(function(resolve,reject){
+     context.search({
+         index: typeName,
+         type: typeName,
+         body: body
+         }
+     ).then(function (res) {
+        if(res.hits.total>0){
+            var results=res.hits.hits;
+            resolve(results[0]._source)
+        }
+    
+       }).catch(function (err) {
+           reject(err);
+         });
+    })    
+ }
